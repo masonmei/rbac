@@ -191,7 +191,7 @@ public class LdapRealm extends AuthorizingRealm {
         user.setUsername(username);
         user.setRoles(role);
 
-        System.out.println("Role"+ user.getRoles().iterator().next().getName());
+        System.out.println("Role [ "+ user.getRoles().iterator().next().getName()+" ]");
 
         return new SimpleAuthenticationInfo(new CustomPrincipal(user, user.getRoles()), userToken.getPassword(),
                 ByteSource.Util.bytes(username), getName());

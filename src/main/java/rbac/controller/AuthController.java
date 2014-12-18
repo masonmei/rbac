@@ -65,8 +65,8 @@ public class AuthController {
   @RequiresRoles("users")
   @RequestMapping(value = "/list_user", method = GET)
   public String getAll() {
-      System.out.println("TED");
-    return SecurityUtils.getSubject().getPrincipal().toString();
+    System.out.println("Role [ "+((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles()+" ]");
+    return null;
   }
 
     @RequestMapping(value = "/logout", method = GET)
