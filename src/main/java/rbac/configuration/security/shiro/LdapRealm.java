@@ -2,10 +2,8 @@ package rbac.configuration.security.shiro;
 
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.AllowAllCredentialsMatcher;
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.ldap.UnsupportedAuthenticationMechanismException;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
@@ -15,21 +13,29 @@ import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rbac.model.Role;
-import rbac.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
+import rbac.configuration.LoginDatabaseConfiguration;
+import rbac.model.login.Role;
+import rbac.model.login.User;
+import rbac.repository.login.PermissionRepository;
+import rbac.repository.login.RoleRepository;
+import rbac.repository.login.UserRepository;
 
-import javax.naming.AuthenticationNotSupportedException;
+import javax.inject.Qualifier;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
+//@Configuration
+@Import(LoginDatabaseConfiguration.class)
 public class LdapRealm extends AuthorizingRealm {
 
     private static final Logger log = LoggerFactory.getLogger(LdapRealm.class);
@@ -40,6 +46,15 @@ public class LdapRealm extends AuthorizingRealm {
     private String userDnSuffix;
 
     private LdapContextFactory contextFactory;
+
+//    @Autowired
+    private UserRepository userRepository;
+//
+//    @Autowired
+    private RoleRepository roleRepository;
+//
+//    @Autowired
+    private PermissionRepository permissionRepository;
 
 
     public LdapRealm() {
@@ -164,10 +179,9 @@ public class LdapRealm extends AuthorizingRealm {
 
             }
 
-            NamingEnumeration<?> groupsQuery = ctx.search("ou=groups,dc=elphita,dc=org", "(&(objectClass=posixGroup)(gidNumber="+userToken.getGid()+"))", getSimpleSearchControls());
+            NamingEnumeration<?> groupsQuery = ctx.search("ou=roles,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+userToken.getUsername()+"))", getSimpleSearchControls());
 
-            while (groupsQuery.hasMore())
-            {
+            while (groupsQuery.hasMore()){
                 SearchResult result = (SearchResult) groupsQuery.next();
                 Attributes attrs = result.getAttributes();
                 System.out.println(attrs.get("cn"));
@@ -177,6 +191,7 @@ public class LdapRealm extends AuthorizingRealm {
                 Role role_new = new Role();
                 role_new.setId(role_new.getId());
                 role_new.setName(attrs.get("cn").get().toString());
+                //roleRepository.save(role_new);
                 role.add(role_new);
             }
 
@@ -190,8 +205,9 @@ public class LdapRealm extends AuthorizingRealm {
         user.setId(user.getId());
         user.setUsername(username);
         user.setRoles(role);
+        //userRepository.save(user);
 
-        System.out.println("Role [ "+ user.getRoles().iterator().next().getName()+" ]");
+        System.out.println("Role [ "+user.getRoles().iterator().toString()+" ]");
 
         return new SimpleAuthenticationInfo(new CustomPrincipal(user, user.getRoles()), userToken.getPassword(),
                 ByteSource.Util.bytes(username), getName());

@@ -1,6 +1,6 @@
 package rbac.configuration.security;
 
-import rbac.model.Role;
+import rbac.model.login.Role;
 
 import java.util.Set;
 

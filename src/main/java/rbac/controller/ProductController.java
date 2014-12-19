@@ -1,10 +1,11 @@
 package rbac.controller;
 
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import rbac.model.Product;
+import rbac.model.app.Product;
 import rbac.service.ProductService;
 
 import javax.servlet.http.HttpServletResponse;
@@ -33,18 +34,20 @@ public class ProductController {
         //System.out.println(productService.findAllBranchWithCategory());
         return hasil;
     }
-
+    @RequiresRoles("users")
     @RequestMapping(value="/product", method=RequestMethod.POST)
     @ResponseStatus(HttpStatus.CREATED)
     public void createProduct(@RequestBody Product product){
         productService.save(product);
     }
 
+    @RequiresRoles("users")
     @RequestMapping(value="/product/{id}", method=RequestMethod.GET)
     public Product productFindById(@PathVariable Integer id){
         return productService.findById(id);
     }
 
+    @RequiresRoles("users")
     @RequestMapping(value="/product/{id}", method=RequestMethod.PUT)
     public void updateProduct(@PathVariable Integer id, @RequestBody Product product){
         Product productOld = productService.findById(id);
@@ -55,6 +58,7 @@ public class ProductController {
         productService.save(productOld);
     }
 
+    @RequiresRoles("users")
     @RequestMapping(value="/product/{id}", method=RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.OK)
     public void deleteProduct(@PathVariable Integer id){

@@ -1,8 +1,8 @@
 package rbac.configuration.security.shiro;
 
 
-import rbac.model.Role;
-import rbac.model.User;
+import rbac.model.login.Role;
+import rbac.model.login.User;
 
 import java.util.Set;
 

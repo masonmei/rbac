@@ -1,4 +1,4 @@
-package rbac.model;
+package rbac.model.app;
 
 import javax.persistence.*;
 import java.io.Serializable;

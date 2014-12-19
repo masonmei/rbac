@@ -1,15 +1,15 @@
-package rbac.model;
+package rbac.model.login;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * Created by chandra on 10/10/14.
+ * Created by chandra on 11/3/14.
  */
-
 @Entity
-@Table(name="category")
-public class Category implements Serializable{
+@Table(name="rb_permission")
+//@org.springframework.beans.factory.annotation.Qualifier("hsqlInMemory")
+public class Permission implements Serializable{
 
     @Id
     @GeneratedValue
@@ -18,11 +18,9 @@ public class Category implements Serializable{
     @Column(name = "name", nullable=false)
     private String name;
 
-    //@OneToMany(mappedBy = "category", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    //@OneToMany(mappedBy = "category", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    //@Column(nullable = true)
-    //@JsonManagedReference
-    //private Set<Product> productSet;
+//    @ManyToOne()
+//    @JoinColumn(name = "rb_user_id")
+//    private User user;
 
     public int getId() {
         return id;
@@ -39,4 +37,12 @@ public class Category implements Serializable{
     public void setName(String name) {
         this.name = name;
     }
+
+//    public User getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(User user) {
+//        this.user = user;
+//    }
 }

@@ -1,9 +1,6 @@
 package rbac.configuration.security.shiro;
 
 import org.apache.shiro.authc.AuthenticationToken;
-import rbac.model.Role;
-
-import java.util.Set;
 
 /**
  * Created by chandra on 11/6/14.

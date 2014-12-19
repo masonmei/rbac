@@ -1,11 +1,14 @@
 package rbac.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -21,15 +24,19 @@ import java.util.Properties;
  */
 
 @Configuration
-public class DatabaseConfiguration {
+@EnableJpaRepositories(
+        entityManagerFactoryRef = "AppEntityManagerFactory",
+        transactionManagerRef = "AppTransactionManager",
+        basePackages = {"rbac.repository.app"})
+public class AppDatabaseConfiguration {
     @Autowired
     Environment env;
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+    @Bean(name="AppEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean AppEntityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
-        em.setPackagesToScan(new String[] { "rbac.*"});
+        em.setDataSource(postgreDatasource());
+        em.setPackagesToScan(new String[] { "rbac.model.app"});
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
@@ -47,26 +54,27 @@ public class DatabaseConfiguration {
         return properties;
     }
 
-    @Bean
-    public DataSource dataSource(){
+    @Bean(name="postgreDatasource")
+    public DataSource postgreDatasource(){
         return DataSourceBuilder.create()
-                .url(env.getProperty("db.url"))
-                .driverClassName(env.getProperty("db.driver"))
-                .username(env.getProperty("db.username"))
-                .password(env.getProperty("db.password"))
+                .url(env.getProperty("db.postgres.url"))
+                .driverClassName(env.getProperty("db.postgres.driver"))
+                .username(env.getProperty("db.postgres.username"))
+                .password(env.getProperty("db.postgres.password"))
                 .build();
     }
 
-    @Bean
-    public PlatformTransactionManager transactionManager(EntityManagerFactory emf){
+    @Bean(name="AppTransactionManager")
+    public PlatformTransactionManager AppTransactionManager(EntityManagerFactory emf){
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(emf);
 
         return transactionManager;
     }
 
-    @Bean
-    public PersistenceExceptionTranslationPostProcessor exceptionTranslation(){
+    @Bean(name="AppExceptionTranslation")
+    public PersistenceExceptionTranslationPostProcessor AppExceptionTranslation(){
         return new PersistenceExceptionTranslationPostProcessor();
     }
+
 }

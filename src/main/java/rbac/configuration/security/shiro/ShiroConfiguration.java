@@ -44,14 +44,6 @@ public class ShiroConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(ShiroConfiguration.class);
 
-
-//      @Bean(name="shiroFilter")
-//      public ShiroFilterFactoryBean shiroFilter() {
-//        ShiroFilterFactoryBean factoryBean = new ShiroFilterFactoryBean();
-//        factoryBean.setSecurityManager(securityManager());
-//        return factoryBean;
-//      }
-
     @Bean(name = "shiroFilter")
     public ShiroFilterFactoryBean shiroFilter() {
         ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
@@ -62,7 +54,7 @@ public class ShiroConfiguration {
         filterChainDefinitionMapping.put("/", "anon");
         filterChainDefinitionMapping.put("/users/auth", "anon");
         filterChainDefinitionMapping.put("/users/create_user", "anon");
-        filterChainDefinitionMapping.put("/users/list_user", "authc,roles[users]");
+        filterChainDefinitionMapping.put("/users/list_user", "authc,roles[ROLE_USER, ROLE_MANAGER]");
         //filterChainDefinitionMapping.put("/admin", "authc,roles[admin]");
         shiroFilter.setFilterChainDefinitionMap(filterChainDefinitionMapping);
         shiroFilter.setSecurityManager(securityManager());

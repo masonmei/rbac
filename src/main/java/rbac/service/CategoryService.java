@@ -1,13 +1,14 @@
 package rbac.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rbac.model.Category;
-import rbac.repository.CategoryRepository;
+import rbac.model.app.Category;
+import rbac.repository.app.CategoryRepository;
 
 /**
  * Created by chandra on 10/10/14.

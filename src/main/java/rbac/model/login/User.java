@@ -1,41 +1,43 @@
-package rbac.model;
+package rbac.model.login;
 
-
-import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Created by chandra on 11/3/14.
  */
 
-public class User{
+@Entity
+@Table(name="rb_user")
+//@org.springframework.beans.factory.annotation.Qualifier("hsqlInMemory")
+public class User implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue
+    private int id;
 
-    private long id;
-
+    @Column(name = "username", nullable=false)
     private String username;
 
+    @Column(name = "email", nullable=false)
     private String email;
 
+    @Column(name = "password", nullable=false)
     private String password;
 
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
     private Set<Role> roles;
 
-    public User(){
-        super();
-    }
+//    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+//    private Set<Permission> permissions;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

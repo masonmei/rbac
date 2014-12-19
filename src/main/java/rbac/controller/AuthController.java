@@ -14,7 +14,6 @@ package rbac.controller;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
@@ -30,10 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 import rbac.configuration.security.AuthenticationToken;
 import rbac.configuration.security.shiro.CustomAuthenticationToken;
 import rbac.configuration.security.shiro.CustomPrincipal;
-import rbac.model.Role;
-import rbac.model.User;
+import rbac.model.login.Role;
 
-import java.util.List;
 import java.util.Set;
 
 
