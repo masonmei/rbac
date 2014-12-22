@@ -1,6 +1,8 @@
 package rbac.model.login;
 
 
+import org.hibernate.annotations.Cascade;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
@@ -15,19 +17,21 @@ import java.util.Set;
 public class User implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "INTEGER", unique = true)
     private int id;
 
     @Column(name = "username", nullable=false)
     private String username;
 
-    @Column(name = "email", nullable=false)
-    private String email;
+//    @Column(name = "email", nullable=false)
+//    private String email;
 
-    @Column(name = "password", nullable=false)
-    private String password;
+//    @Column(name = "password", nullable=false)
+//    private String password;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+    @OneToMany
+    //@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private Set<Role> roles;
 
 //    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
@@ -49,21 +53,21 @@ public class User implements Serializable {
         this.username = username;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
+//
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
 
     public Set<Role> getRoles() {
         return roles;

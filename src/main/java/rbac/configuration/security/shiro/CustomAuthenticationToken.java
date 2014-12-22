@@ -1,10 +1,13 @@
 package rbac.configuration.security.shiro;
 
 import org.apache.shiro.authc.AuthenticationToken;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by chandra on 11/6/14.
  */
+
+@Component
 public class CustomAuthenticationToken implements AuthenticationToken {
 
     private String username;

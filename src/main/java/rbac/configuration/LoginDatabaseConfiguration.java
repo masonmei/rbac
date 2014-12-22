@@ -18,6 +18,7 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
@@ -32,8 +33,10 @@ import java.util.Properties;
         entityManagerFactoryRef = "loginEntityManager",
         transactionManagerRef = "loginTransactionManager",
         basePackages = {"rbac.repository.login"})
+@EnableTransactionManagement
 public class LoginDatabaseConfiguration{
 
+    @Autowired
     private EmbeddedDatabase ed;
 
     @Bean(name="loginEntityManager")
@@ -42,17 +45,19 @@ public class LoginDatabaseConfiguration{
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(hsqlInMemory());
         em.setPackagesToScan(new String[] { "rbac.model.login"});
+        em.setPersistenceUnitName("PU");
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         em.setJpaProperties(additionalJpaProperties());
+        em.afterPropertiesSet();
 
         return em;
     }
 
     Properties additionalJpaProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "create");
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
         properties.setProperty("hibernate.show_sql", "true");
 

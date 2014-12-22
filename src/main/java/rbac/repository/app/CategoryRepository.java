@@ -8,6 +8,6 @@ import rbac.model.app.Category;
  * Created by chandra on 10/10/14.
  */
 
-//@Repository
+@Repository
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
 }

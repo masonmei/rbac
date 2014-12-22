@@ -6,6 +6,7 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.realm.ldap.JndiLdapContextFactory;
+import org.apache.shiro.realm.ldap.JndiLdapRealm;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.realm.ldap.LdapUtils;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -14,17 +15,18 @@ import org.apache.shiro.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 import rbac.configuration.LoginDatabaseConfiguration;
+import rbac.model.login.Permission;
 import rbac.model.login.Role;
 import rbac.model.login.User;
 import rbac.repository.login.PermissionRepository;
 import rbac.repository.login.RoleRepository;
 import rbac.repository.login.UserRepository;
 
-import javax.inject.Qualifier;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
@@ -34,8 +36,7 @@ import javax.naming.ldap.LdapContext;
 import java.util.HashSet;
 import java.util.Set;
 
-//@Configuration
-@Import(LoginDatabaseConfiguration.class)
+@Component
 public class LdapRealm extends AuthorizingRealm {
 
     private static final Logger log = LoggerFactory.getLogger(LdapRealm.class);
@@ -45,24 +46,28 @@ public class LdapRealm extends AuthorizingRealm {
     private String userDnPrefix;
     private String userDnSuffix;
 
+    @Autowired
     private LdapContextFactory contextFactory;
 
-//    @Autowired
     private UserRepository userRepository;
-//
-//    @Autowired
+
     private RoleRepository roleRepository;
-//
-//    @Autowired
+
     private PermissionRepository permissionRepository;
 
-
     public LdapRealm() {
+        super();
         setCredentialsMatcher(new AllowAllCredentialsMatcher());
         setAuthenticationTokenClass(AuthenticationToken.class);
-        this.contextFactory = new JndiLdapContextFactory();
+        //this.contextFactory = new JndiLdapContextFactory();
     }
-
+    
+    @Autowired
+    public LdapRealm(@Qualifier("hsqlInMemory") UserRepository userRepository, @Qualifier("hsqlInMemory") RoleRepository roleRepository, @Qualifier("hsqlInMemory") PermissionRepository permissionRepository){
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.permissionRepository = permissionRepository;
+    }
 
     protected String getUserDnPrefix() {
         return userDnPrefix;
@@ -141,23 +146,30 @@ public class LdapRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
-        final CustomAuthenticationToken userToken = (CustomAuthenticationToken) token;
+        //final CustomAuthenticationToken userToken = (CustomAuthenticationToken) token;
         String username = null;
 
-        username = userToken.getUsername();
+        //username =  token.getPrincipal();
 
-        if (username == null) {
+        Object principal = token.getPrincipal();
+        Object credentials = token.getCredentials();
+
+        if (principal == null) {
             throw new UnknownAccountException("Username not provided");
         }
 
-       LdapContextFactory ldapContextFactory = getContextFactory();
+       LdapContextFactory ldapContextFactory = this.getContextFactory();
 
        LdapContext ctx = null;
 
        Set<Role> role =  new HashSet<Role>();
 
+       Set<Permission> permissionSet = new HashSet<Permission>();
+
+       CustomAuthenticationToken userToken = new CustomAuthenticationToken();
+
         try {
-            ctx = ldapContextFactory.getLdapContext(username, String.valueOf(userToken.getPassword()));
+            ctx = ldapContextFactory.getLdapContext(principal, credentials);
             NamingEnumeration<?> usersQuery = ctx.search("ou=users,dc=elphita,dc=org", "(objectclass=*)", getSimpleSearchControls());
             while (usersQuery.hasMore())
             {
@@ -179,22 +191,55 @@ public class LdapRealm extends AuthorizingRealm {
 
             }
 
-            NamingEnumeration<?> groupsQuery = ctx.search("ou=roles,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+userToken.getUsername()+"))", getSimpleSearchControls());
+//            permissionRepository.saveAndFlush(permission);
+//            permissionSet.add(permission);
 
-            while (groupsQuery.hasMore()){
-                SearchResult result = (SearchResult) groupsQuery.next();
-                Attributes attrs = result.getAttributes();
-                System.out.println(attrs.get("cn"));
-                System.out.println(attrs.get("objectclass"));
-                System.out.println(attrs.get("objectclass"));
-                System.out.println(attrs.get("memberUid"));
-                Role role_new = new Role();
-                role_new.setId(role_new.getId());
-                role_new.setName(attrs.get("cn").get().toString());
-                //roleRepository.save(role_new);
+            NamingEnumeration<?> rolesQuery = ctx.search("ou=roles,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+userToken.getUsername()+"))", getSimpleSearchControls());
+            Role role_new = new Role();
+            while (rolesQuery.hasMore()){
+                SearchResult resultRole = (SearchResult) rolesQuery.next();
+                Attributes attrsRole = resultRole.getAttributes();
+                System.out.println(attrsRole.get("cn"));
+                System.out.println(attrsRole.get("objectclass"));
+                System.out.println(attrsRole.get("objectclass"));
+                System.out.println(attrsRole.get("memberUid"));
+
+                //role_new.setId(role_new.getId());
+
+                NamingEnumeration<?> permissionQuery = ctx.search("ou=permissions,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+attrsRole.get("cn").get().toString()+"))", getPermissionsSimpleSearchControls());
+
+                while (permissionQuery.hasMore()){
+                    SearchResult resultPermissions = (SearchResult) permissionQuery.next();
+                    Attributes attrsPermission = resultPermissions.getAttributes();
+                    System.out.println(attrsPermission.get("cn"));
+                    System.out.println(attrsPermission.get("objectclass"));
+                    System.out.println(attrsPermission.get("objectclass"));
+                    System.out.println(attrsPermission.get("memberUid"));
+
+                    //role_new.setId(role_new.getId());
+                    Permission permission = new Permission();
+                    permission.setName(attrsPermission.get("cn").get().toString());
+
+                    permissionRepository.save(permission);
+                    permissionSet.add(permission);
+
+                }
+                
+
+                role_new.setName(attrsRole.get("cn").get().toString());
+                role_new.setPermission(permissionSet);
+
+                roleRepository.save(role_new);
                 role.add(role_new);
+
             }
 
+            //System.out.println("ROLE "+ role_new);
+            //role_new.setPermission(permissionSet);
+
+            //roleRepository.save(role_new);
+
+            //System.out.println("ROLE "+ role_new.getName());
         } catch (NamingException e) {
             e.printStackTrace();
         } finally {
@@ -202,15 +247,16 @@ public class LdapRealm extends AuthorizingRealm {
         }
 
         User user = new User();
-        user.setId(user.getId());
-        user.setUsername(username);
+        //user.setId(user.getId());
+        user.setUsername((String) principal);
         user.setRoles(role);
-        //userRepository.save(user);
+        //user.getRoles().add(role_new);
+        userRepository.save(user);
 
-        System.out.println("Role [ "+user.getRoles().iterator().toString()+" ]");
+        System.out.println("Role [ "+user.getRoles().iterator().next().getName().toString()+" ]");
 
-        return new SimpleAuthenticationInfo(new CustomPrincipal(user, user.getRoles()), userToken.getPassword(),
-                ByteSource.Util.bytes(username), getName());
+        return new SimpleAuthenticationInfo(new CustomPrincipal(user, user.getRoles()), credentials,
+                ByteSource.Util.bytes(principal.toString()), getName());
     }
 
     @Override
@@ -220,13 +266,20 @@ public class LdapRealm extends AuthorizingRealm {
         for(Role role : ((CustomPrincipal) principals.getPrimaryPrincipal()).getRoles()){
             roleNamesSmplInfo.add(role.getName());
         }
-
+        System.out.println("ROLESSS" +roleNamesSmplInfo.iterator().next().toString());
         return new SimpleAuthorizationInfo(roleNamesSmplInfo);
     }
 
     protected static SearchControls getSimpleSearchControls(){
         SearchControls searchControls = new SearchControls();
         searchControls.setSearchScope(SearchControls.ONELEVEL_SCOPE);
+        searchControls.setTimeLimit(30000);
+        return searchControls;
+    }
+
+    protected static SearchControls getPermissionsSimpleSearchControls(){
+        SearchControls searchControls = new SearchControls();
+        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
         searchControls.setTimeLimit(30000);
         return searchControls;
     }

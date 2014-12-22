@@ -12,7 +12,8 @@ import java.io.Serializable;
 public class Permission implements Serializable{
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "INTEGER", unique = true)
     private int id;
 
     @Column(name = "name", nullable=false)

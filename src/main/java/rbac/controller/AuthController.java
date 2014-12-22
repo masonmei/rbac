@@ -45,15 +45,15 @@ public class AuthController {
   public AuthenticationToken authenticate(@RequestBody final UsernamePasswordToken credentials) {
   final Subject subject = SecurityUtils.getSubject();
 
-      CustomAuthenticationToken token = new CustomAuthenticationToken(credentials.getUsername(), credentials.getPassword());
+      //CustomAuthenticationToken token = new CustomAuthenticationToken(credentials.getUsername(), credentials.getPassword());
 
-      subject.login(token);
+      subject.login(credentials);
 
-      subject.getSession().setAttribute("username", token.getUsername());
+      subject.getSession().setAttribute("username", credentials.getUsername());
 
       subject.getSession().setAttribute("role",  ((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles());
 
-      String username = token.getUsername();
+      String username = credentials.getUsername();
       Set<Role> roles = ((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles();
       String sessionId = (String) subject.getSession().getId();
       return new AuthenticationToken(username, roles, sessionId);

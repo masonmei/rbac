@@ -13,7 +13,8 @@ import java.util.Set;
 public class Role implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "INTEGER", unique = true)
     private int id;
 
     @Column(name = "name", nullable=false)
@@ -22,7 +23,7 @@ public class Role implements Serializable {
 //    @ManyToMany(mappedBy = "roles")
 //    private Set<User> users;
 
-    @OneToMany(cascade= CascadeType.ALL, fetch= FetchType.EAGER)
+    @OneToMany
     private Set<Permission> permission;
 
     public int getId() {

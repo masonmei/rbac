@@ -20,14 +20,20 @@ import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.session.mgt.eis.AbstractSessionDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-
+//@Component
 public class CustomSessionDao extends AbstractSessionDAO {
 
   private static final Logger log = LoggerFactory
       .getLogger(CustomSessionDao.class);
 
   private Map<Serializable, Session> map;
+
+
+  public CustomSessionDao(){
+      super();
+  }
 
   @Override
   protected Serializable doCreate(Session session) {
