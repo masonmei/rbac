@@ -2,6 +2,7 @@ package rbac.configuration.security;
 
 import rbac.model.login.Role;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -9,14 +10,14 @@ import java.util.Set;
  */
 public class AuthenticationToken {
     private String username;
-    private Set<Role> roles;
+    private Collection<Role> roles;
     private String token;
 
     public AuthenticationToken() {
         super();
     }
 
-    public AuthenticationToken(String username, Set<Role> roles, String token) {
+    public AuthenticationToken(String username, Collection<Role> roles, String token) {
         this.roles = roles;
         this.token = token;
         this.username = username;
@@ -30,11 +31,11 @@ public class AuthenticationToken {
         this.username = username;
     }
 
-    public Set<Role> getRoles() {
+    public Collection<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Collection<Role> roles) {
         this.roles = roles;
     }
 

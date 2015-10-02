@@ -1,5 +1,7 @@
 package rbac.controller;
 
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,8 @@ import java.util.Set;
 /**
  * Created by chandra on 10/24/14.
  */
+//@RequiresRoles(value = {"ROLE_MANAGER", "ROLE_USER"}, logical = Logical.OR)
+//@RequiresRoles("ROLE_USER")
 @RestController
 public class ProductController {
 
@@ -36,32 +40,15 @@ public class ProductController {
     /**
      * CRUD Product
      */
-    @RequiresRoles("ROLE_MANAGER")
+    @RequiresRoles(value = {"ROLE_MANAGER", "ROLE_USER"}, logical = Logical.OR)
+    //@RequiresPermissions("READ")
+    //@RequiresRoles("ROLE_USER")
     @RequestMapping(value="/product", method= RequestMethod.GET)
     @ResponseBody
     public List<Product> findAllProduct(
             Pageable pageable,
             HttpServletResponse response) {
         List<Product> hasil = productService.findAll(pageable).getContent();
-        //System.out.println(productService.findAllBranchWithCategory());
-
-        Role role = new Role();
-        role.setName("admin");
-        roleRepository.saveAndFlush(role);
-
-        Set<Role> roleSet = new HashSet<Role>();
-        roleSet.add(role);
-
-        System.out.println("Role "+ role.getName());
-//
-        User user = new User();
-        user.setUsername("chandra");
-        user.setRoles(roleSet);
-        userRepository.saveAndFlush(user);
-
-        List<User> users = userRepository.findAll();
-
-        System.out.println("USER "+ users.get(0));
 
         return hasil;
     }

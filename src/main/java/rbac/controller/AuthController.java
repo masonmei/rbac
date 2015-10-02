@@ -31,6 +31,7 @@ import rbac.configuration.security.shiro.CustomAuthenticationToken;
 import rbac.configuration.security.shiro.CustomPrincipal;
 import rbac.model.login.Role;
 
+import java.util.Collection;
 import java.util.Set;
 
 
@@ -54,7 +55,7 @@ public class AuthController {
       subject.getSession().setAttribute("role",  ((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles());
 
       String username = credentials.getUsername();
-      Set<Role> roles = ((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles();
+      Collection<Role> roles = ((CustomPrincipal) SecurityUtils.getSubject().getPrincipals().getPrimaryPrincipal()).getRoles();
       String sessionId = (String) subject.getSession().getId();
       return new AuthenticationToken(username, roles, sessionId);
   }

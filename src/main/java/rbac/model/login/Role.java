@@ -1,7 +1,13 @@
 package rbac.model.login;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -20,11 +26,17 @@ public class Role implements Serializable {
     @Column(name = "name", nullable=false)
     private String name;
 
-//    @ManyToMany(mappedBy = "roles")
-//    private Set<User> users;
+    @ManyToOne
+    @JsonBackReference
+    private User user;
 
-    @OneToMany
-    private Set<Permission> permission;
+    @OneToMany(mappedBy="role")
+    @JsonManagedReference
+    private List<Permission> permission;
+
+    public Role(){
+        permission = new ArrayList<Permission>();
+    }
 
     public int getId() {
         return id;
@@ -42,19 +54,33 @@ public class Role implements Serializable {
         this.name = name;
     }
 
-//    public Set<User> getUsers() {
-//        return users;
-//    }
-//
-//    public void setUsers(Set<User> users) {
-//        this.users = users;
-//    }
+    public User getUser() {
+        return user;
+    }
 
-    public Set<Permission> getPermission() {
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Collection<Permission> getPermission() {
         return permission;
     }
 
-    public void setPermission(Set<Permission> permission) {
-        this.permission = permission;
+//    public void setPermission(Permission permission) {
+//        if (!getPermission().contains(permission)) {
+//            getPermission().add(permission);
+//            if (permission.getRole() != null) {
+//                permission.getRole().getPermission().remove(permission);
+//            }
+//            permission.setRole(this);
+//        }
+//    }
+
+
+    public void setPermission(List<Permission> permission) {
+        System.out.println("PERMISSION "+ permission);
+        //for(Permission permission1 : permission) {
+            this.permission = permission;
+        //}
     }
 }

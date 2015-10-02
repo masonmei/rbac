@@ -1,5 +1,7 @@
 package rbac.model.login;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -19,9 +21,9 @@ public class Permission implements Serializable{
     @Column(name = "name", nullable=false)
     private String name;
 
-//    @ManyToOne()
-//    @JoinColumn(name = "rb_user_id")
-//    private User user;
+    @ManyToOne
+    @JsonBackReference
+    private Role role;
 
     public int getId() {
         return id;
@@ -39,11 +41,11 @@ public class Permission implements Serializable{
         this.name = name;
     }
 
-//    public User getUser() {
-//        return user;
-//    }
-//
-//    public void setUser(User user) {
-//        this.user = user;
-//    }
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }

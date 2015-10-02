@@ -1,10 +1,15 @@
 package rbac.model.login;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.action.internal.CollectionRecreateAction;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -30,9 +35,13 @@ public class User implements Serializable {
 //    @Column(name = "password", nullable=false)
 //    private String password;
 
-    @OneToMany
-    //@Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-    private Set<Role> roles;
+    @OneToMany(mappedBy="user")
+    @JsonManagedReference
+    private List<Role> roles;
+
+    public User(){
+        roles = new ArrayList<Role>();
+    }
 
 //    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 //    private Set<Permission> permissions;
@@ -69,11 +78,23 @@ public class User implements Serializable {
 //        this.password = password;
 //    }
 
-    public Set<Role> getRoles() {
+
+    public Collection<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+//    public void setRoles(Role roles) {
+//        if (!getRoles().contains(roles)) {
+//            getRoles().add(roles);
+//            if (roles.getUser() != null) {
+//                roles.getUser().getRoles().remove(roles);
+//            }
+//            roles.setUser(this);
+//        }
+//    }
+
+
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
     }
 }

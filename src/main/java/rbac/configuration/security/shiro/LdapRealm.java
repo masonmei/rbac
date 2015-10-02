@@ -33,8 +33,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class LdapRealm extends AuthorizingRealm {
@@ -146,11 +145,6 @@ public class LdapRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
-        //final CustomAuthenticationToken userToken = (CustomAuthenticationToken) token;
-        String username = null;
-
-        //username =  token.getPrincipal();
-
         Object principal = token.getPrincipal();
         Object credentials = token.getCredentials();
 
@@ -162,11 +156,14 @@ public class LdapRealm extends AuthorizingRealm {
 
        LdapContext ctx = null;
 
-       Set<Role> role =  new HashSet<Role>();
-
-       Set<Permission> permissionSet = new HashSet<Permission>();
-
        CustomAuthenticationToken userToken = new CustomAuthenticationToken();
+
+        List<Role> roleSet = new ArrayList<Role>();
+        List<Permission> permissionSetUser = new ArrayList<Permission>();
+        List<Permission> permissionSetManager = new ArrayList<Permission>();
+        List<Permission> permissionSetAdmin = new ArrayList<Permission>();
+
+       User user = new User();
 
         try {
             ctx = ldapContextFactory.getLdapContext(principal, credentials);
@@ -175,85 +172,88 @@ public class LdapRealm extends AuthorizingRealm {
             {
                 SearchResult result = (SearchResult) usersQuery.next();
                 Attributes attrs = result.getAttributes();
-                System.out.println(attrs.get("cn"));
-                System.out.println(attrs.get("gidnumber"));
-                System.out.println(attrs.get("givenname"));
-                System.out.println(attrs.get("homedirectory"));
-                System.out.println(attrs.get("objectclass"));
-                System.out.println(attrs.get("objectclass"));
-                System.out.println(attrs.get("objectclass"));
-                System.out.println(attrs.get("sn"));
-                System.out.println(attrs.get("uid"));
-                System.out.println(attrs.get("uidnumber"));
-                System.out.println(attrs.get("userpassword"));
+
                 userToken.setUsername(attrs.get("cn").get().toString());
                 userToken.setGid(Integer.parseInt(attrs.get("gidnumber").get().toString()));
 
             }
 
-//            permissionRepository.saveAndFlush(permission);
-//            permissionSet.add(permission);
-
             NamingEnumeration<?> rolesQuery = ctx.search("ou=roles,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+userToken.getUsername()+"))", getSimpleSearchControls());
-            Role role_new = new Role();
+            //Role role_new = null;
             while (rolesQuery.hasMore()){
                 SearchResult resultRole = (SearchResult) rolesQuery.next();
                 Attributes attrsRole = resultRole.getAttributes();
-                System.out.println(attrsRole.get("cn"));
-                System.out.println(attrsRole.get("objectclass"));
-                System.out.println(attrsRole.get("objectclass"));
-                System.out.println(attrsRole.get("memberUid"));
 
-                //role_new.setId(role_new.getId());
 
                 NamingEnumeration<?> permissionQuery = ctx.search("ou=permissions,dc=elphita,dc=org", "(&(objectClass=posixGroup)(memberUid="+attrsRole.get("cn").get().toString()+"))", getPermissionsSimpleSearchControls());
-
                 while (permissionQuery.hasMore()){
                     SearchResult resultPermissions = (SearchResult) permissionQuery.next();
                     Attributes attrsPermission = resultPermissions.getAttributes();
-                    System.out.println(attrsPermission.get("cn"));
-                    System.out.println(attrsPermission.get("objectclass"));
-                    System.out.println(attrsPermission.get("objectclass"));
-                    System.out.println(attrsPermission.get("memberUid"));
 
-                    //role_new.setId(role_new.getId());
-                    Permission permission = new Permission();
-                    permission.setName(attrsPermission.get("cn").get().toString());
+                    List<String> memberUid = new ArrayList<String>();
+                    String rolesString = attrsRole.get("cn").get().toString();
+                    String[] roleList = rolesString.split(",");
+                    Permission permissionUser = new Permission();
+                    Permission permissionManager = new Permission();
+                    Permission permissionAdmin = new Permission();
+                    for(int i=0; i<roleList.length; i++) {
 
-                    permissionRepository.save(permission);
-                    permissionSet.add(permission);
+                        if((roleList[i].toString().equals("ROLE_USER")) == true) {
+
+                             System.out.println("PERMISSION USER"+ attrsPermission.get("cn").get().toString());
+                             permissionUser.setName(attrsPermission.get("cn").get().toString());
+                             permissionSetUser.add(permissionUser);
+                             permissionRepository.saveAndFlush(permissionUser);
+
+
+                        }else if((roleList[i].toString().equals("ROLE_MANAGER")) == true){
+                            System.out.println("PERMISSION MANAGER"+ attrsPermission.get("cn").get().toString());
+                            permissionManager.setName(attrsPermission.get("cn").get().toString());
+                            permissionSetManager.add(permissionManager);
+                            permissionRepository.saveAndFlush(permissionManager);
+
+                        }else if((roleList[i].toString().equals("ROLE_ADMIN")) == true){
+
+                            System.out.println("PERMISSION ADMIN"+ attrsPermission.get("cn").get().toString());
+
+                            permissionAdmin.setName(attrsPermission.get("cn").get().toString());
+                            permissionSetAdmin.add(permissionAdmin);
+                            permissionRepository.saveAndFlush(permissionAdmin);
+                        }
+
+
+                    }
+
+
+
 
                 }
-                
 
+                Role role_new = new Role();
                 role_new.setName(attrsRole.get("cn").get().toString());
-                role_new.setPermission(permissionSet);
+                if(role_new.getName().equals("ROLE_USER")){
+                  role_new.setPermission(permissionSetUser);
+                }else if(role_new.getName().equals("ROLE_MANAGER")){
+                  role_new.setPermission(permissionSetManager);
+                }else if(role_new.getName().equals("ROLE_ADMIN")){
+                  role_new.setPermission(permissionSetAdmin);
+                }
+                roleSet.add(role_new);
+                roleRepository.saveAndFlush(role_new);
 
-                roleRepository.save(role_new);
-                role.add(role_new);
 
             }
 
-            //System.out.println("ROLE "+ role_new);
-            //role_new.setPermission(permissionSet);
+            user.setUsername((String) principal);
+            user.setRoles(roleSet);
+            userRepository.saveAndFlush(user);
 
-            //roleRepository.save(role_new);
-
-            //System.out.println("ROLE "+ role_new.getName());
         } catch (NamingException e) {
             e.printStackTrace();
         } finally {
             LdapUtils.closeContext(ctx);
         }
 
-        User user = new User();
-        //user.setId(user.getId());
-        user.setUsername((String) principal);
-        user.setRoles(role);
-        //user.getRoles().add(role_new);
-        userRepository.save(user);
-
-        System.out.println("Role [ "+user.getRoles().iterator().next().getName().toString()+" ]");
 
         return new SimpleAuthenticationInfo(new CustomPrincipal(user, user.getRoles()), credentials,
                 ByteSource.Util.bytes(principal.toString()), getName());
@@ -266,8 +266,19 @@ public class LdapRealm extends AuthorizingRealm {
         for(Role role : ((CustomPrincipal) principals.getPrimaryPrincipal()).getRoles()){
             roleNamesSmplInfo.add(role.getName());
         }
-        System.out.println("ROLESSS" +roleNamesSmplInfo.iterator().next().toString());
-        return new SimpleAuthorizationInfo(roleNamesSmplInfo);
+
+        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo(roleNamesSmplInfo);
+
+        for(Role rolePermissionFecth : ((CustomPrincipal) principals.getPrimaryPrincipal()).getRoles()) {
+            List<Permission> permissionSet = (List<Permission>) rolePermissionFecth.getPermission();
+            for(Permission permission : permissionSet) {
+                String permissionName = permission.getName();
+                info.addStringPermission(permissionName);
+            }
+        }
+
+        System.out.println("INFO " +info.getStringPermissions().toString());
+        return info;
     }
 
     protected static SearchControls getSimpleSearchControls(){

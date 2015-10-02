@@ -47,25 +47,25 @@ public class ShiroConfiguration {
     @Bean(name = "shiroFilter")
     public ShiroFilterFactoryBean shiroFilter() {
         ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
-        shiroFilter.setLoginUrl("users/auth");
-        shiroFilter.setSuccessUrl("users/list_user");
-        shiroFilter.setUnauthorizedUrl("/forbidden");
-        Map<String, String> filterChainDefinitionMapping = new HashMap<String, String>();
-        filterChainDefinitionMapping.put("/", "anon");
-        filterChainDefinitionMapping.put("/users/auth", "anon");
-        filterChainDefinitionMapping.put("/users/create_user", "anon");
-        filterChainDefinitionMapping.put("/users/list_user", "authc,roles[ROLE_USER, ROLE_MANAGER]");
+//        shiroFilter.setLoginUrl("users/auth");
+//        shiroFilter.setSuccessUrl("users/list_user");
+//        shiroFilter.setUnauthorizedUrl("/forbidden");
+//        Map<String, String> filterChainDefinitionMapping = new HashMap<String, String>();
+//        filterChainDefinitionMapping.put("/", "anon");
+//        filterChainDefinitionMapping.put("/users/auth", "anon");
+//        filterChainDefinitionMapping.put("/users/create_user", "anon");
+//        filterChainDefinitionMapping.put("/users/list_user", "authc,roles[ROLE_USER, ROLE_MANAGER]");
+        //filterChainDefinitionMapping.put("/product", "authc,roles[ROLE_USER]");
         //filterChainDefinitionMapping.put("/admin", "authc,roles[admin]");
-        shiroFilter.setFilterChainDefinitionMap(filterChainDefinitionMapping);
+//        shiroFilter.setFilterChainDefinitionMap(filterChainDefinitionMapping);
         shiroFilter.setSecurityManager(securityManager());
-        Map<String, Filter> filters = new HashMap<String, Filter>();
-        filters.put("anon", new AnonymousFilter());
-        filters.put("authc", new FormAuthenticationFilter());
-        filters.put("logout", new LogoutFilter());
-        filters.put("roles", new RolesAuthorizationFilter());
-        filters.put("user", new UserFilter());
-        shiroFilter.setFilters(filters);
-        System.out.println(shiroFilter.getFilters().size());
+//        Map<String, Filter> filters = new HashMap<String, Filter>();
+//        filters.put("anon", new AnonymousFilter());
+//        filters.put("authc", new FormAuthenticationFilter());
+//        filters.put("logout", new LogoutFilter());
+//        filters.put("roles", new RolesAuthorizationFilter());
+//        filters.put("user", new UserFilter());
+//        shiroFilter.setFilters(filters);
         return shiroFilter;
     }
 

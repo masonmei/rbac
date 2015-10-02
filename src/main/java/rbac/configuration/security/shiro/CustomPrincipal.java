@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import rbac.model.login.Role;
 import rbac.model.login.User;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -16,13 +17,13 @@ import java.util.Set;
 public class CustomPrincipal {
 
     private User user;
-    private Set<Role> roles;
+    private Collection<Role> roles;
 
     public CustomPrincipal(){
         super();
     }
 
-    public CustomPrincipal(User user, Set<Role> roles) {
+    public CustomPrincipal(User user, Collection<Role> roles) {
         this.user = user;
         this.roles = roles;
     }
@@ -35,11 +36,11 @@ public class CustomPrincipal {
         this.user = user;
     }
 
-    public Set<Role> getRoles() {
+    public Collection<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Collection<Role> roles) {
         this.roles = roles;
     }
 }
